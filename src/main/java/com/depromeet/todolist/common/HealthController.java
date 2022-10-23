@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
  * <p>
  * It doesn't matter if you delete it.
  **/
+
 @Controller
 public class HealthController {
     @GetMapping({"/", "/health"})

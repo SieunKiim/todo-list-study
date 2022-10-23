@@ -1,41 +1,72 @@
-# DEPROMEET TODO-LIST STUDY
-> Made By 극락코딩, 궁금하신 내용이 있다면 언제든 연락주세요!!
-
-### 필수 구현 요구사항
-- JAVA 17 기준으로 진행해주세요 (18버전에서 에러를 발견했습니다.)
-- TODOLIST CRUD API를 구현하세요(생성, 수정, 삭제, 단건조회, 전체조회)
-- RESTFUL한 API를 구현하도록 노력해보세요
-- 클린코드란 무엇일까요? 고민해보면서 좋을 것 같아요
-- 객체지향 패러다임을 고민하며 구현을 진행해요
-- README를 꼭 작성해주세요!!
-- 본인이 생각하기에 TODO-LIST에 필요하다고 생각되는 기능이 있다면 추가해도 좋아요!
-
-### PR 및 코드리뷰 진행 과정
-- depremeet repo에 브랜치를 아래와 같은 이름으로 만들어주세요!
-  - `dev/본인깃허브명` ex) dev/donggeon0908
-
-![image](https://user-images.githubusercontent.com/50691225/160888908-a88d268a-ad64-46d1-8221-4545c0a673d4.png) 
-  
-- depremeet repo를 본인 repo로 fork 떠주세요!
-
-![image](https://user-images.githubusercontent.com/50691225/160888086-46e83ab7-e65a-48ec-a361-47cfad208278.png)
-
-- 필수 요구사항과 본인이 생각하는 요구사항을 정리해서 스터디 과제를 진행합니다!
-  - 과제를 진행할 때는 본인 repo의 `dev/본인깃허브명`에서 작업을 진행합니다!
-
-![image](https://user-images.githubusercontent.com/50691225/160888417-2f7a8903-b9b1-4c8c-a820-dfb30ad5b882.png)
+# REAL TODO-LIST
 
 
-- 작업이 완료되면 본인 repo `dev/본인깃허브명` -> depremeet repo `dev/본인깃허브명`로 PR을 요청해주세요!
+> ## FOCUSED ON
+>- REST 컨벤션 준수
+>- 한 메서드당 하나의 기능
+>  - 가독성 확보
+>- Custom Exception
+>  - 에러 메시지 구체화
+>- ResponseEntity 를 활용한 status & body
+>- JPA 를 활용한 엔티티 CRUD
+>  - Transactional
+>  - ManyToOne, OneToMany
+>    - FK 없는 관계
+>-  일급 컬렉션(Todos)을 활용한 User별 Todo List 관리
 
-![image](https://user-images.githubusercontent.com/50691225/160888687-69d9a465-5356-472b-ab2c-b53191d5b3af.png)
 
-- 코드리뷰가 달리면, 해당 코드리뷰를 바탕으로 새롭게 코드를 작성하시고, 다시 재요청 진행해주세요!
-- 주의사항
-  - 만약에 depremeet main에 머지되게 되면 버저닝에 문제가 발생할 수 있습니다 ㅜㅜ
-  - pr 및 코드리뷰 진행에 어려움을 느끼신다면 극락코딩에게 연락주세요!
+# API
+Swagger 문서화
+
+![img.png](img.png)
 
 
-### REVIEW 진행해주시면 감사하겠습니다!
-- 디프만 구성원 모두가 편하게 리뷰를 진행해주시면 될 것 같아요!
-- 스터디를 참여하는 인원에게 도움이 될 수 있는 리뷰를 부탁드려요!
+## dto
+- Request
+  - RequestUserDto
+  - RequestTodoDto
+- Response
+  - ResponseUserDto
+  - ResponseTodoDto
+
+
+## controller
+- UserController
+  - 생성 (method : POST, "/users")
+    - RequestBody : RequestUserDto
+  - 조회 (method : GET, "/users/{name}")
+  - 삭제 (method : DELETE, "/users/{name}")
+- TodoController
+  - 생성  (method : POST, "/users/{name}/todo-list")
+    - RequestBody : RequestTodoDto
+  - 목록 조회 (method : GET, "/users/{name}/todo-list")
+  - 단일 조회 (method : GET, "/users/{name}/todo-list/{todoId}")
+  - 수정 (method : PATCH, "/users/{name}/todo-list/{todoId}")
+    - RequestBody : RequestTodoDto
+  - 삭제 (method : DELETE, "/users/{name}/todo-list/{todoId}")
+
+
+## service
+각 서비스에서 Entity -> Dto 변환 메서드를 따로 만들어 하나의 메서드가 하나의 역할을 가질 수 있도록 함
+- CommonService
+  - findUserByIdIfExists (사용자 존재하는 시 사용자 반환)
+- UserService
+  - findUser (사용자 검색)
+  - createUser (사용자 추가)
+  - deleteUser (사용자 삭제)
+- TodoService
+  - findTodo (할 일 검색)
+  - addTodo (할 일 추가)
+  - updateTodoTitle (할 일 수정) -- need help
+  - deleteTodo (할 일 삭제)
+  - isUserContainsTodo (해당 사용자 todo 목록에 있는지)
+
+
+## exception
+- ErrorCode (Enum type)을 통해 exception 관리
+  - DUPLICATED_USER (중복된 사용자 예외)
+  - NO_TODO (할 일 없는 예외)
+  - NO_USER (사용자 없는 예외)
+- 상황 별 에러메시지 구체화
+  - ex) 사용자 중복시 (DUPLICATED_USER) 어떤 유저와 중복되는지 errorDetail 작성
+- @RestControllerAdvice 를 활용한 에러 Response
